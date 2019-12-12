@@ -1,13 +1,3 @@
-# Ball Tail?
-# More complicated ball design
-# Background
-
-# Help Part
-# leader board
-# Super Powers
-
-# Regular commits have 3 marks
-
 from math import cos, sin, atan2, pi
 import random
 

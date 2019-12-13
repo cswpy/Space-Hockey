@@ -1,3 +1,10 @@
+# More complicated ball design
+# Background
+
+# Help Part
+# leader board
+# Super Powers
+
 from math import cos, sin, atan2, pi
 import random
 
@@ -50,15 +57,16 @@ class Puck:
         else:
             arc(self.x, self.y, 2*_[1], 2*_[1], PI/2 - self.angle, PI/2 + self.angle)
         
-        noStroke(); fill(0, 0, 255)
+        noStroke()
         image(img_puck, self.x - _[0], self.y - _[0], 2*_[0], 2*_[0])
         # circle(self.x, self.y, 2*_[0])
                 
-        stroke(0); noFill()
+        stroke(255); noFill()
         circle(self.x, self.y, 2*_[1])
 
         
     def draw_Line(self):
+        stroke(255)
         strokeWeight(1)
         noFill()
         if self.isUP:
@@ -160,9 +168,10 @@ class Ball:
             self.trail.pop(0)
             self.trail.append((self.x, self.y))
             
-        
+            
+        noStroke()
         for i in range(len(self.trail)):
-            fill(255 - (i+1)*255/len(self.trail))
+            fill((i+1)*255/len(self.trail))
             circle(self.trail[i][0], self.trail[i][1], 2*r1*i/len(self.trail))
             # circle(self.x, self.y, 2*r1)
         
@@ -322,16 +331,18 @@ class Game:
         
     def draw(self):
         if not self.frozen:
-            background(255)
+            image(img_back, 0, 0, n, m)
+            # background(255)
             self.PA.draw()
             self.PB.draw()
             self.B.draw()
             
+            stroke(255)
             strokeWeight(3)
             line(0, m/2, n, m/2) 
             
             # Display score
-            fill(0)
+            fill(255)
             textAlign(LEFT, LEFT)
             textSize(15)
             text(str(self.scoreA), 5, 15)
@@ -350,7 +361,7 @@ class Game:
         
 
 def setup():
-    global game, screen, diff, img_main, img_single_white, img_single_black, img_multi_white, img_multi_black, img_pause, img_puck
+    global game, screen, diff, img_main, img_single_white, img_single_black, img_multi_white, img_multi_black, img_pause, img_puck, img_help, img_back
     global handler_down, handler_up
     global sound_bounce, sound_score, sound_win
     
@@ -365,6 +376,8 @@ def setup():
     img_multi_black = loadImage('img\\multi_black.png')
     img_pause = loadImage('img\\pause.png')
     img_puck = loadImage('img\\puck.png')
+    img_help = loadImage('img\\help.png')
+    img_back = loadImage('img\\background.jpg')
     
     sound_bounce = audioPlayer.loadFile('sound\\bounce.mp3')
     sound_score = audioPlayer.loadFile('sound\\score.mp3')
@@ -374,10 +387,10 @@ def setup():
     handler_down = {UP:False, DOWN:False, RIGHT:False, LEFT:False}
 
     diff = 1
-    screen = 'main'
+    screen = 'main' # 'main', 'pause', 'single', 'multi', 'help'
     
 def draw():
-    if screen == 'main':
+    if screen == 'main' or screen == 'help':
         clear()
         image(img_main, 0, 0, 400, 600)
         
@@ -392,6 +405,14 @@ def draw():
         image(img_multi_white, 150, 450, 100, 100)
         if 150 < mouseX < 150+100 and 450 < mouseY < 450+100:
             image(img_multi_black, 150, 450, 100, 100)
+            
+        if n - 60 < mouseX < n and m - 60 < mouseY < m:
+            tint(0)
+        image(img_help, n - 60, m - 60, 50, 50)
+        tint(255)
+        
+        if screen == 'help':
+            rect(50, 50, n - 100, m - 100)
     
     elif screen == 'pause':
         pass
@@ -433,6 +454,8 @@ def mousePressed():
             game = Game()
             handler_up = {UP:False, DOWN:False, RIGHT:False, LEFT:False}
             handler_down = {UP:False, DOWN:False, RIGHT:False, LEFT:False}
+        if n - 60 < mouseX < n and m - 60 < mouseY < m:
+            screen = 'help'
     elif screen == 'pause':
         screen = 'single'
         noCursor()

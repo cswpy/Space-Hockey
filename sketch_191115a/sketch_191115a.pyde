@@ -1,12 +1,12 @@
 # More complicated ball design
 # Background
 
-# Help Part
 # leader board
 # Super Powers
 
 from math import cos, sin, atan2, pi
 import random
+import os
 
 add_library('minim')
 audioPlayer = Minim(this)
@@ -290,7 +290,10 @@ class Game:
         self.isWin = False
         noCursor()
     
-        
+#    def getPoint(self,arg):
+#        if arg == 'A':
+            
+    
     def score(self, arg):
         if arg == 'A':
             self.scoreA += 1
@@ -305,14 +308,15 @@ class Game:
         #! Is 5 fine?
         win_number = 5
         if self.scoreA == win_number:
-            self.win('A')
+            self.win('A',self.scoreA,self.scoreB)
         elif self.scoreB == win_number:
-            self.win('B')
+            self.win('B',self.scoreA, self.scoreB)
         
     def afterScore(self):
         self.init()
         
-    def win(self, arg):
+    def win(self, arg,scoreA,scoreB):
+        global record_s, record_m
         self.isWin = True
         stroke(255, 0, 0)
         fill(255)
@@ -323,9 +327,22 @@ class Game:
         textAlign(CENTER, CENTER)
         textSize(30)
         if screen == 'multi':
-            text(('Lower' if arg == 'B' else 'Upper') +' Player Won!', 50, 200, 300, 200)
+            if(arg=='B'):
+                text('Lower Player Won!',50,200,300,200)
+                s = 'Lower '+str(scoreA)+' '+str(scoreB)
+            else:
+                text('Upper Player Won!',50,200,300,200)
+                s = 'Upper '+str(scoreA)+' '+str(scoreB)
+            record_m.append(s)
         elif screen == 'single':
-            text(('You' if arg == 'B' else 'The Computer') + ' Won!', 50, 200, 300, 200)
+            if(arg=='B'):
+                text('Player Won!',50,200,300,200)
+                s = 'Player '+str(scoreA)+' '+str(scoreB)
+            else:
+                text('Computer Won!',50,200,300,200)
+                s = 'Computer '+str(scoreA)+' '+str(scoreB)
+            record_s.append(s)
+            print(record_s)
         noStroke()
         self.Music('win')
         
@@ -361,36 +378,44 @@ class Game:
         
 
 def setup():
-    global game, screen, diff, img_main, img_single_white, img_single_black, img_multi_white, img_multi_black, img_pause, img_puck, img_help, img_back
+    global game, screen, diff, img_main, img_single_white, img_single_black, img_multi_white, img_multi_black, img_pause, img_puck, img_help, img_back, img_record
     global handler_down, handler_up
     global sound_bounce, sound_score, sound_win
+    global mode
+    global record_s, record_m
     
     size(n, m)
     background(255)
     # frameRate(100)
     
-    img_main = loadImage('img\\main.png')
-    img_single_white = loadImage('img\\single_white.png') # 512*512
-    img_single_black = loadImage('img\\single_black.png')
-    img_multi_white = loadImage('img\\multi_white.png')
-    img_multi_black = loadImage('img\\multi_black.png')
-    img_pause = loadImage('img\\pause.png')
-    img_puck = loadImage('img\\puck.png')
-    img_help = loadImage('img\\help.png')
-    img_back = loadImage('img\\background.jpg')
+    record_s = []
+    record_m = []
     
-    sound_bounce = audioPlayer.loadFile('sound\\bounce.mp3')
-    sound_score = audioPlayer.loadFile('sound\\score.mp3')
-    sound_win = audioPlayer.loadFile('sound\\win.wav')
+    img_main = loadImage('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\img\\main.png')
+    img_single_white = loadImage('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\img\\single_white.png') # 512*512
+    img_single_black = loadImage('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\img\\single_black.png')
+    img_multi_white = loadImage('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\img\\multi_white.png')
+    img_multi_black = loadImage('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\img\\multi_black.png')
+    img_pause = loadImage('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\img\\pause.png')
+    img_puck = loadImage('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\img\\puck.png')
+    img_help = loadImage('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\img\\help.png')
+    img_back = loadImage('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\img\\background.jpg')
+    img_record = loadImage('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\img\\leaderboard_white.png')
+    
+    sound_bounce = audioPlayer.loadFile('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\sound\\bounce.mp3')
+    sound_score = audioPlayer.loadFile('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\sound\\score.mp3')
+    sound_win = audioPlayer.loadFile('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\sound\\win.wav')
     
     handler_up = {UP:False, DOWN:False, RIGHT:False, LEFT:False}
     handler_down = {UP:False, DOWN:False, RIGHT:False, LEFT:False}
-
+    mode = ''
+    
     diff = 1
     screen = 'main' # 'main', 'pause', 'single', 'multi', 'help'
     
 def draw():
-    if screen == 'main' or screen == 'help':
+    global screen
+    if screen == 'main' or screen == 'help' or screen == 'record':
         clear()
         image(img_main, 0, 0, 400, 600)
         
@@ -408,12 +433,68 @@ def draw():
             
         if n - 60 < mouseX < n and m - 60 < mouseY < m:
             tint(0)
+            screen='help'
+        else:
+            screen='main'
         image(img_help, n - 60, m - 60, 50, 50)
         tint(255)
         
-        if screen == 'help':
-            rect(50, 50, n - 100, m - 100)
-    
+        # #records button
+        # #tint(0)
+        # if 20 < mouseX < 70 and m - 60 < mouseY < m:
+        #     tint(0)
+        #     screen='record'
+        # else:
+        #     screen='main'
+        # image(img_record, 20, m - 60, 50, 50)
+        # tint(255)
+        
+        if screen == 'help': #help screen design
+            fill(200, 200, 200, 191)
+            noStroke()
+            rect(0, 0, n, m)
+            s = "Capture the moving disk and shoot it towards opponent's goal to score.\nWASD - Movement\nQ - Back\nSpace Bar - Pause\nEsc - Quit\n"
+            fill(0)
+            textSize(20)
+            text(s,60,200,300,300)
+        
+        if 20 < mouseX < 70 and m - 60 < mouseY < m:
+            tint(0)
+            screen='record'
+        else:
+            screen='main'
+        image(img_record, 20, m - 60, 50, 50)
+        tint(255)
+        
+        
+        
+        if screen == 'record': #record screen design
+            fill(200, 200, 200, 191)
+            noStroke()
+            rect(0, 0, n, m)
+            s='Single Mode:\n'
+            if record_s:
+                for item in record_s:
+                    winner = item.split(' ')[0]
+                    max_s = max(item.split(' ')[1:])
+                    min_s = min(item.split(' ')[1:])
+                    s+=str(winner)+' won: '+str(max_s)+'-'+str(min_s)+'\n'
+            else:
+                s += 'Empty'
+            s+='\nMultiplayer Mode:\n'
+            if record_m:
+                for item in record_m:
+                    winner = item.split(' ')[0]
+                    max_s = max(item.split(' ')[1:])
+                    min_s = min(item.split(' ')[1:])
+                    s+=str(winner)+' won: '+str(max_s)+'-'+str(min_s)+'\n'
+            else:
+                s += 'Empty'
+            
+            fill(0)
+            textSize(20)
+            text(s,60,50,300,300)
+            
     elif screen == 'pause':
         pass
     elif screen == 'single':
@@ -440,24 +521,26 @@ def draw():
         game.draw()
     
 def mousePressed():
-    global diff, screen, game, handler_up, handler_down
+    global diff, screen, game, handler_up, handler_down, mode
     
     if screen == 'main':
         if 150 < mouseX < 150+100 and 350 < mouseY < 350+100:
             # Single Player
             diff = int((mouseX-150)/20)+1
             screen = 'single'
+            mode = 'single'
             game = Game()
         if 150 < mouseX < 150+100 and 450 < mouseY < 450+100:
             # Multiplayer
+            mode = 'multi'
             screen = 'multi'
             game = Game()
             handler_up = {UP:False, DOWN:False, RIGHT:False, LEFT:False}
             handler_down = {UP:False, DOWN:False, RIGHT:False, LEFT:False}
-        if n - 60 < mouseX < n and m - 60 < mouseY < m:
+        if n - 60 < mouseX < n and m - 60 < mouseY < m: #help screen detection
             screen = 'help'
     elif screen == 'pause':
-        screen = 'single'
+        screen = mode
         noCursor()
     elif screen == 'single' or screen == 'multi':
         if game.isWin:
@@ -480,7 +563,7 @@ def keyPressed():
             screen = 'pause'
             cursor()
         elif screen == 'pause':
-            screen = 'single'
+            screen = mode
             noCursor()
     
     if screen == 'multi':

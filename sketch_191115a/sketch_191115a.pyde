@@ -1,9 +1,3 @@
-# More complicated ball design
-# Background
-
-# leader board
-# Super Powers
-
 from math import cos, sin, atan2, pi
 import random
 import os

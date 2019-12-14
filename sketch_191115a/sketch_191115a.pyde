@@ -11,9 +11,9 @@ import os
 add_library('minim')
 audioPlayer = Minim(this)
 
-n, m = 400, 600
-r1 = 10    # smallest possible radius
-r2 = 3*r1  # biggest possible radius
+n, m = 400, 600  # width, heigh
+r1 = 10          # smallest possible radius
+r2 = 3*r1        # biggest possible radius
 
 class Puck:
     def __init__(self, isUP):
@@ -26,25 +26,26 @@ class Puck:
             self.y = int(m/4)  
         else:
             self.x = int(n/2)
-            self.y = int(3*m/4)  
-        
-        # self.eventKeys # [Up, Down, Right, Left]
+            self.y = int(3*m/4)
 
     @property
     def ratio(self):
+        # get the angle ratio
         relative = abs(self.y - m/2)
         if r1 <= relative <= m/2 - r2:
-            return (relative-r1) / (m/2.0 - r1 - r2) # Why 2.0 works while 2 does not
+            return (relative-r1) / (m/2.0 - r1 - r2)
         else:
             raise Exception
         
     @property
     def radii(self):
+        # return a tuple of both outer and inner radii
         r = r1 + self.ratio * (r2-r1)
         return [r, r + r1 * (1 + self.ratio)] # return [puck radius, capturing radius]
     
     @property
     def angle(self):
+        # the angle of the red arc
         return (1 - self.ratio) * (PI/2 - PI/12) + PI/12
 
 
@@ -89,6 +90,9 @@ class Puck:
         self.draw_Puck()
         
     def move(self, x, y):
+        # Moving and reflecting of the ball 
+        
+        
         # if y < m/2 + r1:
         #     y = m/2 + r1
         # elif y > m - r2:
@@ -176,6 +180,7 @@ class Ball:
             # circle(self.x, self.y, 2*r1)
         
     def createNext(self):
+        # moves the ball to the next frame
         return (self.x + self.vel * cos(self.a),
                 self.y + self.vel * sin(self.a))
         
@@ -391,20 +396,20 @@ def setup():
     record_s = []
     record_m = []
     
-    img_main = loadImage('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\img\\main.png')
-    img_single_white = loadImage('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\img\\single_white.png') # 512*512
-    img_single_black = loadImage('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\img\\single_black.png')
-    img_multi_white = loadImage('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\img\\multi_white.png')
-    img_multi_black = loadImage('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\img\\multi_black.png')
-    img_pause = loadImage('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\img\\pause.png')
-    img_puck = loadImage('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\img\\puck.png')
-    img_help = loadImage('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\img\\help.png')
-    img_back = loadImage('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\img\\background.jpg')
-    img_record = loadImage('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\img\\leaderboard_white.png')
+    img_main = loadImage('img\\main.png')
+    img_single_white = loadImage('img\\single_white.png') # 512*512
+    img_single_black = loadImage('img\\single_black.png')
+    img_multi_white = loadImage('img\\multi_white.png')
+    img_multi_black = loadImage('img\\multi_black.png')
+    img_pause = loadImage('img\\pause.png')
+    img_puck = loadImage('img\\puck.png')
+    img_help = loadImage('img\\help.png')
+    img_back = loadImage('img\\background.jpg')
+    img_record = loadImage('img\\leaderboard_white.png')
     
-    sound_bounce = audioPlayer.loadFile('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\sound\\bounce.mp3')
-    sound_score = audioPlayer.loadFile('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\sound\\score.mp3')
-    sound_win = audioPlayer.loadFile('E:\\Courseware\\Fall Semester 2019\\Intro to Computer Science\\Space Hockey\\sound\\win.wav')
+    sound_bounce = audioPlayer.loadFile('sound\\bounce.mp3')
+    sound_score = audioPlayer.loadFile('sound\\score.mp3')
+    sound_win = audioPlayer.loadFile('sound\\win.wav')
     
     handler_up = {UP:False, DOWN:False, RIGHT:False, LEFT:False}
     handler_down = {UP:False, DOWN:False, RIGHT:False, LEFT:False}
@@ -414,6 +419,8 @@ def setup():
     screen = 'main' # 'main', 'pause', 'single', 'multi', 'help'
     
 def draw():
+    # Draw function divided across different screens
+    
     global screen
     if screen == 'main' or screen == 'help' or screen == 'record':
         clear()
@@ -550,6 +557,7 @@ def mousePressed():
             game.afterScore()
 
 def keyPressed():
+    # Key pressed throughout the different screens
     global screen
     if key == 'q' or key == 'Q':
         screen = 'main'
@@ -585,6 +593,7 @@ def keyPressed():
             handler_up[LEFT] = True
 
 def keyReleased():
+    # Key released
     if screen == 'multi':
         if keyCode == UP:
             handler_down[UP] = False
